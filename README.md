@@ -1,2 +1,2 @@
-# Student_Dropout_Prediction
-SJSU CMPE 257 Project - Student Dropout Prediction Model
+# California Wildfire Prediction Model
+SJSU 2025 Spring CMPE 257 Project
