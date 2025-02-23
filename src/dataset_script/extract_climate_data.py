@@ -1,72 +1,106 @@
 import requests
 import os
 import sys
+import time
+import pandas as pd
+from datetime import datetime, timedelta
+from dotenv import load_dotenv
+from dateutil.relativedelta import relativedelta
 
 # Add project path to os.path
 current_path = os.path.abspath('.')
 project_name = 'california_wild_fire_prediction'
 project_path = os.path.join(current_path.split(project_name)[0], project_name)
 sys.path.append(project_path)
+load_dotenv('.env')
 
 # NOAA API Endpoint
-BASE_URL = "https://www.ncei.noaa.gov/access/services/data/v1"
+BASE_URL = "https://www.ncei.noaa.gov/cdo-web/api/v2/data"
+API_TOKEN = os.environ.get("NOAA_TOKEN")
 
-# Extract California stations from GHCN station list
-STATION_LIST_URL = "http://www1.ncdc.noaa.gov/pub/data/ghcn/daily/ghcnd-stations.txt"
+# Request headers
+HEADERS = {"token": API_TOKEN}
 
-def get_california_stations():
-    """Fetches California station IDs from the GHCN station list."""
-    stations = []
-    response = requests.get(STATION_LIST_URL)
-    if response.status_code == 200:
-        for line in response.text.split("\n"):
-            if " CA " in line:  # California stations have ' CA ' in the metadata
-                station_id = line[:11].strip()
-                stations.append(station_id)
-    return stations
+# Parameters
+DATASET_ID = "GHCND"
+LOCATION_ID = "FIPS:06"  # California
+# LIMIT = 1000  # Max API return size per request
+LIMIT = 100
 
-def fetch_weather_data(station_ids, start_date, end_date):
-    """Fetches weather data for the given stations and date range."""
-    params = {
-        "dataset": "daily-summaries",
-        "startDate": start_date,
-        "endDate": end_date,
-        "stations": ",".join(station_ids),
-        "dataTypes": "ALL",  # Fetch all available observations
-        "format": "csv"
-    }
-    response = requests.get(BASE_URL, params=params)
-    
-    if response.status_code == 200:
-        return response.text
-    else:
-        print(f"Failed to fetch data: {response.status_code}")
-        return None
 
-def save_to_csv(data, filename):
-    """Saves fetched data to a CSV file."""
-    with open(filename, "w") as file:
-        file.write(data)
-    print(f"Data saved to {filename}")
+def fetch_data(start_date, end_date):
+    """Fetch weather data from NOAA CDO API within the given date range, handling pagination."""
+    offset = 0
+    all_data = []
+
+    while True:
+        params = {
+            "datasetid": DATASET_ID,
+            "locationid": LOCATION_ID,
+            "startdate": start_date,
+            "enddate": end_date,
+            "limit": LIMIT,
+            "offset": offset
+        }
+
+        response = requests.get(BASE_URL, headers=HEADERS, params=params)
+
+        if response.status_code != 200:
+            print(f"Error {response.status_code}: {response.text}")
+            break
+        
+        data = response.json().get("results", [])
+        if not data:
+            break  # Stop if no more data
+
+        all_data.extend(data)
+        offset += LIMIT  # Move to next batch
+
+        time.sleep(1)  # Prevent hitting API rate limit
+
+    return all_data
+
+
+def get_month_ranges(start_date, end_date):
+    """Generate precise month-long date ranges between start_date and end_date."""
+    ranges = []
+    current_date = datetime.strptime(start_date, "%Y-%m-%d")
+    final_date = datetime.strptime(end_date, "%Y-%m-%d")
+
+    while current_date <= final_date:
+        # Set the end of the current month OR the final date (whichever is smaller)
+        last_day_of_month = (current_date.replace(day=1) + relativedelta(months=1)) - timedelta(days=1)
+        range_end = min(last_day_of_month, final_date)
+
+        ranges.append((current_date.strftime("%Y-%m-%d"), range_end.strftime("%Y-%m-%d")))
+
+        # Move to the first day of the next month
+        current_date = range_end + timedelta(days=1)
+
+    return ranges
+
 
 
 if __name__ == "__main__":
-    print("Fetching California station IDs...")
-    california_stations = get_california_stations()
-    print(','.join(california_stations[:10]))
     start_date = '2025-01-01'
-    end_date = '2025-01-01'
+    end_date = '2025-01-31'
+
+    date_ranges = get_month_ranges(start_date, end_date)
+    all_climate_data = []
 
     data_name = f"ca_{''.join(start_date.split('-'))}_{''.join(end_date.split('-'))}.csv"
-    climate_data_path = os.path.join('data', 'climate_data', data_name)
+    filename = os.path.join('data', 'climate_data', data_name)
 
-    if not california_stations:
-        print("No stations found for California.")
-    else:
-        print(f"Found {len(california_stations)} stations in California.")
-        print("Fetching weather data...")
-
-        weather_data = fetch_weather_data(california_stations, "2025-01-01", "2025-01-01")
+    for start, end in date_ranges:
+        print(f"Fetching data from {start} to {end}...")
+        weather_data = fetch_data(start, end)
         
         if weather_data:
-            save_to_csv(weather_data, climate_data_path)
+            all_climate_data.extend(weather_data)
+
+    if all_climate_data:
+        df = pd.DataFrame(all_climate_data)
+        df.to_csv(filename, index=False)
+        print(f"Weather data saved to {filename}.")
+    else:
+        print("No data retrieved.")

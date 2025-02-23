@@ -1,35 +1,12 @@
 ## NOAA's NCEI API Request to Fetch Climate Data
 
 ### Guildline document
-- [google drive link](https://drive.google.com/drive/u/0/folders/1lETRgX6_F8OhvQ1kRv6g2aK5mVprDFxG)
-### API Endpoint:
-```
-https://www.ncei.noaa.gov/access/services/data/v1
-```
+- [NOAA Climate Data Online](https://www.ncdc.noaa.gov/cdo-web/webservices/v2#gettingStarted)
 
-### Request Parameters:
-- `dataset`: daily-summaries
-- `startDate`: 2025-01-01
-- `endDate`: 2025-01-01
-- `stations`: (All California stations, which we can extract [GHCN station list](https://www1.ncdc.noaa.gov/pub/data/ghcn/daily/ghcnd-stations.txt))
-- `dataTypes`: (Based on Table 4 in the documentation, we can retrieve all available parameters)
-- `format`: csv
+### Datasets
 
-### Example API Request:
-```
-https://www.ncei.noaa.gov/access/services/data/v1?dataset=daily-summaries&startDate=2025-01-01&endDate=2025-01-01&locationCategory=STATE&locationid=FIPS:06&dataTypes=PRCP,SNOW,SNWD,TMAX,TMIN,AWND,EVAP,WDFG,WDFM,WSFG,TSUN&format=csv
-```
-- `dataset=daily-summaries` → Fetches daily summary weather data.
-- `startDate=2025-01-01&endDate=2025-01-01` → Gets data for January 1, 2025.
-- `locationCategory=STATE&locationid=FIPS:06` → Retrieves data specifically for California (FIPS code: 06).
-- `dataTypes=...` → Includes key weather elements such as:
-    - `PRCP` (Precipitation)
-    - `SNOW` (Snowfall)
-    - `SNWD` (Snow Depth)
-    - `TMAX` (Max Temperature)
-    - `TMIN` (Min Temperature)
-    - `AWND` (Average Wind Speed)
-    - `EVAP` (Evaporation)
-    - `WDFG`, WDFM, WSFG (Wind Gusts, Fastest Mile Wind)
-    - `TSUN` (Sunshine duration)
-- `format=csv` → Retrieves data in CSV format for easier processing.
+### Datatypes
+From total [1566](https://www.ncei.noaa.gov/cdo-web/api/v2/datatypes) data, data that is included in GHCND dataset and date including after 2020-01-01 are [68](https://www.ncei.noaa.gov/cdo-web/api/v2/datatypes?datasetid=GHCND&startdate=2020-01-01&limit=80).
+
+### Locations
+[California location id](https://www.ncei.noaa.gov/cdo-web/api/v2/locations?locationcategoryid=ST&offset=5&limit=1) = `FIPS:06`
