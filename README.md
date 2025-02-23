@@ -64,21 +64,30 @@ The Wildfire Risk Prediction Model is a machine learning project designed to pre
 - Visualize results and complete final report.
 - Submit findings and model analysis.
 
-## Task Distribution
+## Git Workflow & Commit Message Convention
 
-All team members will collaborate on all major tasks, ensuring a balanced workload. Specific task responsibilities may vary but will include:
+### Branching Strategy
 
-- **Data Preparation:** Automating extraction, handling missing values, and feature engineering.
-- **Model Development:** Experimenting with different algorithms and architectures.
-- **Implementation & Validation:** Setting up environments, training, and testing models.
-- **Evaluation & Visualization:** Interpreting results, assessing performance, and generating visual reports.
-- **Documentation & Reporting:** Writing reports and preparing presentations.
+- `main`: Stable and production-ready code.
 
-## Technologies Used
+- `feature/{jira-issue-name}`: New features are developed here before merging into develop.
 
-- **Programming Language:** Python
-- **Machine Learning Libraries:** scikit-learn, TensorFlow/PyTorch, XGBoost
-- **Data Processing:** Pandas, NumPy
-- **Visualization:** Matplotlib, Seaborn
-- **Cloud & Storage:** Google Drive
-- **Version Control:** GitHub
+- `bugfix/{jira-issue-name}`: Fixes for bugs found in develop.
+
+- `hotfix/{jira-issue-name}`: Urgent bug fixes that need to be patched into main.
+
+### Commit Message Format
+
+To maintain consistency and readability, we follow this structured format:
+```
+[type]: [short description]
+
+[Optional detailed description]
+```
+
+**Commit Types**:
+- `feat`: A new feature
+- `fix`: A bug fix
+- `docs`: Documentation updates
+- `refactor`: Code restructuring without functionality changes
+- `chore`: Maintenance tasks (build processes, dependency updates, etc.)
