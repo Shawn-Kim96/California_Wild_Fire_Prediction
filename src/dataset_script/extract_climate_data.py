@@ -56,7 +56,7 @@ def fetch_data(start_date, end_date):
         all_data.extend(data)
         offset += LIMIT  # Move to next batch
 
-        time.sleep(1)  # Prevent hitting API rate limit
+        # time.sleep(1)  # Prevent hitting API rate limit
 
     return all_data
 
@@ -83,7 +83,7 @@ def get_month_ranges(start_date, end_date):
 
 if __name__ == "__main__":
     start_date = '2025-01-01'
-    end_date = '2025-01-31'
+    end_date = '2025-01-01'
 
     date_ranges = get_month_ranges(start_date, end_date)
     all_climate_data = []
