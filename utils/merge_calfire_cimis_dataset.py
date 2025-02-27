@@ -5,6 +5,8 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+BASE_PATH = os.getenv("BASE_PATH")
+
 class CIMIS:
 
     def __init__(self, zipcodes=None):
@@ -68,9 +70,9 @@ def process_row(row, cimis):
     return results
 
 cimis = CIMIS()
-start, end = 0, 50
-calfire_data_file = "../data/raw/mapdataall.csv"
-processed_data_file = f"../data/processed/{start}_{end}.csv"
+start, end = 101, 200  # Change the values here to dictate what rows to fetch
+calfire_data_file = BASE_PATH + "/data/raw/mapdataall.csv"
+processed_data_file = BASE_PATH + f"/data/processed/{start}_{end}.csv"
 
 df = pd.read_csv(calfire_data_file)
 df_subset = df.iloc[start:end]
