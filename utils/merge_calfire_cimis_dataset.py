@@ -1,11 +1,17 @@
 import os
+import sys
 import requests
 import pandas as pd
 from dotenv import load_dotenv
 
 load_dotenv()
 
-BASE_PATH = os.getenv("BASE_PATH")
+current_path = os.path.abspath('.')
+project_name = 'california_wild_fire_prediction'
+BASE_PATH = os.path.join(current_path.split(project_name)[0], project_name)
+sys.path.append(BASE_PATH)
+load_dotenv('.env')
+
 
 class CIMIS:
 
@@ -71,8 +77,8 @@ def process_row(row, cimis):
 
 cimis = CIMIS()
 start, end = 101, 200  # Change the values here to dictate what rows to fetch
-calfire_data_file = BASE_PATH + "/data/raw/mapdataall.csv"
-processed_data_file = BASE_PATH + f"/data/processed/{start}_{end}.csv"
+calfire_data_file = os.path.join(BASE_PATH, "/data/raw/mapdataall.csv")
+processed_data_file = os.path.join(BASE_PATH, f"/data/processed/{start}_{end}.csv")
 
 df = pd.read_csv(calfire_data_file)
 df_subset = df.iloc[start:end]
