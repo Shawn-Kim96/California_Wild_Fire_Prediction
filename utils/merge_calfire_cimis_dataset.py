@@ -31,7 +31,6 @@ class CIMIS:
     def make_request(self, endpoint, params=None):
         try:
             url = os.getenv("CIMIS_BASE_URL") + endpoint
-            print(url, params)
             headers = {"Accept": "application/json", "Content-Type": "application/json"}
             response = requests.get(url, headers=headers, params=params)
             response.raise_for_status()
