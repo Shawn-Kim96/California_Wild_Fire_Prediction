@@ -1,0 +1,4 @@
+BASE_PATH = "/Users/kenzhang/Git/California_Wild_Fire_Prediction"
+
+CIMIS_BASE_URL = "https://et.water.ca.gov/api"
+CIMIS_API_KEY = "7d73896c-7595-4529-ad7d-6edbe50ffd0b"
