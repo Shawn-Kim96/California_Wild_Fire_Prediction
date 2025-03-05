@@ -2,17 +2,19 @@ import os
 import json
 import requests
 import pandas as pd
+from datetime import datetime
 from dotenv import load_dotenv
+from dateutil.relativedelta import relativedelta
 from geopy.distance import geodesic
 
 load_dotenv()
 
 BASE_PATH = os.path.abspath('.')
-START_ROW = 2605
-END_ROW = 2775
+START_ROW = 1534
+END_ROW = 2063
 COUNTY_ZIPCODES = BASE_PATH + "/zipcodes_by_county.json"
 LONGLAT_ZIPCODES = BASE_PATH + "/zipcodes_by_longlat.json"
-CALFIRE_DATA_FILE = BASE_PATH + "/data/processed/draft2.csv"
+CALFIRE_DATA_FILE = BASE_PATH + "/data/processed/raw/mapdataall.csv"
 PROCESSED_DATA_FILE = BASE_PATH + f"/data/processed/{START_ROW}_{END_ROW}.csv"
 
 class CIMIS:
@@ -115,39 +117,83 @@ def process_row_by_longlat(row, cimis):
     min_distance = float("inf")
     zipcodes = None
 
-
     for key, value in cimis.zipcodes.items():
         long, lat = map(float, key.split(","))
-        # print(f"JSON: {lat}, {long}")
         distance = geodesic((incident_lat, incident_long), (lat, long)).meters
 
         if distance < min_distance:
             min_distance = distance
             zipcodes = value
 
-    station_records = cimis.get_data_zipcodes(zipcodes, incident_date, incident_date)
+    # Fetch data for the last 14 days
+    start_date = (datetime.strptime(incident_date, "%Y-%m-%d") - relativedelta(days=14)).strftime("%Y-%m-%d")
+    station_records = cimis.get_data_zipcodes(zipcodes, start_date, incident_date)
 
     if station_records is None:
         return {item: None for item in cimis.data_items.keys()}
     
-    records = station_records.get("Data", {}).get("Providers", [{}])[0].get("Records", None)
+    records = station_records.get("Data", {}).get("Providers", [{}])[0].get("Records", [])
 
-    if records is None:
+    if not records:
         return {item: None for item in cimis.data_items.keys()}
-    
-    record = records[0]
+
     results = {}
-    for item in cimis.data_items.keys():
-        value = record.get(item, {}).get("Value", None)
-        results[item] = float(value) if value is not None else None
+
+    # Iterate through the last 14 days and create feature columns
+    for i in range(14):
+        if i < len(records):  # Ensure we don't access out-of-range indexes
+            record = records[i]
+            for item in cimis.data_items.keys():
+                value = record.get(item, {}).get("Value", None)
+                results[f"{item}{str(i+1).zfill(2)}"] = float(value) if value is not None else None
+        else:
+            # If there are missing days, fill with None
+            for item in cimis.data_items.keys():
+                results[f"{item}{str(i+1).zfill(2)}"] = None
+
     return results
 
-with open(LONGLAT_ZIPCODES, "r") as f:
-    zipcodes = json.load(f)
-    cimis = CIMIS(zipcodes)
+def organize_csv(file):
+    output_file = BASE_PATH + "/data/processed/organized_output.csv"
 
-    df = pd.read_csv(CALFIRE_DATA_FILE)
-    df_subset = df.iloc[START_ROW:END_ROW]
-    process_results = df_subset.apply(lambda row: process_row_by_longlat(row, cimis), axis=1, result_type="expand")
-    df_updated = pd.concat([df_subset, process_results], axis=1)
-    df_updated.to_csv(PROCESSED_DATA_FILE, index=False)
+    df = pd.read_csv(file)
+
+    last_70_cols = df.columns[-70:]
+    filled_rows = df.dropna(subset=last_70_cols, how="any")
+    unfilled_rows = df[~df.index.isin(filled_rows.index)]
+
+    filled_rows_sorted = filled_rows.sort_values(by="incident_name", ascending=True)
+
+    sorted_df = pd.concat([filled_rows_sorted, unfilled_rows], ignore_index=True)
+    sorted_df.to_csv(output_file, index=False)
+
+def merge_csvs(file1, file2, index):
+    output_file = BASE_PATH + "/data/processed/merged_output.csv"
+
+    df_a = pd.read_csv(file1)
+    df_b = pd.read_csv(file2)
+
+    df_a.set_index(index, inplace=True)
+    df_b.set_index(index, inplace=True)
+
+    df_a.update(df_b)
+
+    df_a.reset_index(inplace=True)
+
+    df_a.to_csv(output_file, index=False)
+
+
+if __name__ == "__main__":
+    print(f"PROCESSING ROWS {START_ROW} TO {END_ROW}...")
+
+    with open(LONGLAT_ZIPCODES, "r") as f:  
+        zipcodes = json.load(f)
+        cimis = CIMIS(zipcodes)
+
+        df = pd.read_csv(CALFIRE_DATA_FILE)
+        df_subset = df.iloc[START_ROW:END_ROW]
+        process_results = df_subset.apply(lambda row: process_row_by_longlat(row, cimis), axis=1, result_type="expand")
+        df_updated = pd.concat([df_subset, process_results], axis=1)
+        df_updated.to_csv(PROCESSED_DATA_FILE, index=False)
+        
+    print("PROCESSING COMPLETE.")
