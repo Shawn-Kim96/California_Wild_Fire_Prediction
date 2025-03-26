@@ -142,7 +142,7 @@ def process_row_by_longlat(row, cimis):
 
     return results
 
-def process_missing_wildfire_dates(input_file, output_file, start_row, end_row):
+def process_non_wildfire_dates(input_file, output_file, start_row, end_row):
     print(f"PROCESSING ROWS {start_row} TO {end_row}...")
 
     with open(LONGLAT_ZIPCODES, "r") as f:  
@@ -153,15 +153,43 @@ def process_missing_wildfire_dates(input_file, output_file, start_row, end_row):
         df_subset = df.iloc[start_row:end_row]
         process_results = df_subset.apply(lambda row: process_row_by_longlat(row, cimis), axis=1, result_type="expand")
         df_updated = pd.concat([df_subset, process_results], axis=1)
-        df_updated.to_csv(output_file, index=False)
+
+        # Save each chunk to a temporary file
+        temp_output_file = output_file.replace(".csv", f"_{start_row}_{end_row}.csv")
+        df_updated.to_csv(temp_output_file, index=False)
+
+        print(f"Chunk saved to {temp_output_file}")
+
+        # df_updated.to_csv(output_file, index=False)
         
-    print(f"PROCESSING COMPLETE. Data saved to {output_file}")
+    # print(f"PROCESSING COMPLETE. Data saved to {output_file}")
+
+def combine_chunks(output_file, max_row):
+    all_chunks = []
+    for start_row in range(0, max_row, CHUNK_SIZE):
+        end_row = min(start_row + CHUNK_SIZE, max_row)
+        temp_output_file = output_file.replace(".csv", f"_{start_row}_{end_row}.csv")
+        chunk_df = pd.read_csv(temp_output_file)
+        all_chunks.append(chunk_df)
+    
+    # Combine all chunks into a single dataframe
+    final_df = pd.concat(all_chunks, axis=0)
+    final_df.to_csv(output_file, index=False)
+    print(f"All data combined into {output_file}")
 
 def main():
-    start_row = int(input("Enter the start row: "))
-    end_row = int(input("Enter the end row: "))
-
-    process_missing_wildfire_dates(NON_WILDFIRE_DATES_FILE, OUTPUT_FILE, start_row, end_row)
+    # start_row = 0
+    # end_row = start_row + CHUNK_SIZE  # Start with the first chunk
+    
+    # while end_row <= MAX_END_ROW:
+    #     process_non_wildfire_dates(NON_WILDFIRE_DATES_FILE, OUTPUT_FILE, start_row, end_row)
+    #     start_row = end_row
+    #     end_row = min(start_row + CHUNK_SIZE, MAX_END_ROW)
+    #     if end_row >= MAX_END_ROW:
+    #         break
+    
+    # Combine all processed chunks into one final file
+    combine_chunks(OUTPUT_FILE, MAX_END_ROW)
 
 if __name__ == "__main__":
     main()
