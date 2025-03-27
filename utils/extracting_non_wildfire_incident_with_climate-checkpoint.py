@@ -17,7 +17,7 @@ COUNTY_ZIPCODES = BASE_PATH + "/zipcodes_by_county.json"
 NON_WILDFIRE_DATES_FILE = BASE_PATH + "/data/processed/non_wildfire/non_wildfire_dates.csv"
 OUTPUT_FILE = BASE_PATH + "/data/processed/non_wildfire/processed_non_wildfire_dates.csv"
 MIN_START_ROW = 0
-MAX_END_ROW = 1436
+MAX_END_ROW = 3100
 CHUNK_SIZE = 100  # Number of rows per chunk
 
 class CIMIS:
@@ -178,18 +178,16 @@ def combine_chunks(output_file, max_row):
     print(f"All data combined into {output_file}")
 
 def main():
-    # start_row = 0
-    # end_row = start_row + CHUNK_SIZE  # Start with the first chunk
+    start_row = 0
+    end_row = start_row + CHUNK_SIZE  # Start with the first chunk
     
-    # while end_row <= MAX_END_ROW:
-    #     process_non_wildfire_dates(NON_WILDFIRE_DATES_FILE, OUTPUT_FILE, start_row, end_row)
-    #     start_row = end_row
-    #     end_row = min(start_row + CHUNK_SIZE, MAX_END_ROW)
-    #     if end_row >= MAX_END_ROW:
-    #         break
+    while end_row <= MAX_END_ROW:
+        process_non_wildfire_dates(NON_WILDFIRE_DATES_FILE, OUTPUT_FILE, start_row, end_row)
+        start_row = end_row
+        end_row = min(start_row + CHUNK_SIZE, MAX_END_ROW)
     
     # Combine all processed chunks into one final file
-    combine_chunks(OUTPUT_FILE, MAX_END_ROW)
+    combine_chunks(OUTPUT_FILE, 3100)
 
 if __name__ == "__main__":
     main()
