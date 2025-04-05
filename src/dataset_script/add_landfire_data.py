@@ -47,7 +47,10 @@ def add_landfire_data(fire_df):
         tree = sklearn.neighbors.BallTree(coords, metric='haversine')
 
         # Query nearest neighbors for fire_df coords
-        fire_coords = np.radians(fire_df[["incident_latitude", "incident_longitude"]].values)
+        if "incident_latitude" in fire_df.columns:
+            fire_coords = np.radians(fire_df[["incident_latitude", "incident_longitude"]].values)
+        else:
+            fire_coords = np.radians(fire_df[["lat", "lng"]].values)
         dist, idx = tree.query(fire_coords, k=1)
 
         # Add matched CBD info to fire_df
