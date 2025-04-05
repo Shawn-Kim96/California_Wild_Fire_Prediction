@@ -14,8 +14,8 @@ LONGLAT_ZIPCODES = BASE_PATH + "/zipcodes_by_longlat.json"
 COUNTY_ZIPCODES = BASE_PATH + "/zipcodes_by_county.json"
 
 # Input & Output files
-NON_WILDFIRE_DATES_FILE = BASE_PATH + "/data/processed/non_wildfire/non_wildfire_dates.csv"
-OUTPUT_FILE = BASE_PATH + "/data/processed/non_wildfire/processed_non_wildfire_dates.csv"
+NON_WILDFIRE_DATES_FILE = "data/calfire_cimis_non_wildfire_data/non_wildfire_dates.csv"
+OUTPUT_FILE = "data/calfire_cimis_non_wildfire_data/processed_non_wildfire_dates.csv"
 MIN_START_ROW = 0
 MAX_END_ROW = 3100
 CHUNK_SIZE = 100  # Number of rows per chunk
