@@ -26,8 +26,14 @@ data_name_column_dict = {
     'fvc': 'FVC_VALUE',    
 }
 
-def add_landfire_data(fire_data_path, final_data_path):
-    fire_df = pd.read_csv(fire_data_path)
+def add_landfire_data(fire_df):
+    """
+    Add new landfire columns (features) to existing fire data. 
+    Landfire data is used located in data/landfire_data/processed/
+    
+    params:
+        - fire_df: existing fire data path
+    """
     
     for data_name, column_name in data_name_column_dict.items():
         t = time.time()
@@ -49,15 +55,15 @@ def add_landfire_data(fire_data_path, final_data_path):
         fire_df[f"{data_name}_DISTANCE_KM"] = dist.flatten() * 6371  # Convert from radians to km
         logging.info(f"{data_name} landfire data concate complete :: {time.time() - t}")
     
-    fire_df.to_csv(final_data_path)
-    logging.info(f"Data saved with landfire data concated in {final_data_path}")
+    return fire_df
 
 
 if __name__=="__main__":
-    parser = argparse.ArgumentParser(description='Process fire and add local_fire_data final data paths.')
-    parser.add_argument('--fire_data_path', type=str, required=True, help='Path to the fire data file')
-    parser.add_argument('--final_data_path', type=str, required=True, help='Path to the final data file')
+    print("Input have changed")
+    # parser = argparse.ArgumentParser(description='Process fire and add local_fire_data final data paths.')
+    # parser.add_argument('--fire_data_path', type=str, required=True, help='Path to the fire data file')
+    # parser.add_argument('--final_data_path', type=str, required=True, help='Path to the final data file')
     
-    args = parser.parse_args()
+    # args = parser.parse_args()
 
-    add_landfire_data(fire_data_path=args.fire_data_path, final_data_path=args.final_data_path)
+    # add_landfire_data(fire_data_path=args.fire_data_path, final_data_path=args.final_data_path)
