@@ -21,12 +21,13 @@ class CIMIS:
 
     def __init__(self, zipcodes=None):
         try:
+            # Daily class
             self.data_items = {
-                "DayAirTmpAvg": "day-air-tmp-avg",
-                "DayPrecip": "day-precip",
-                "DayRelHumAvg": "day-rel-hum-avg",
-                "DaySoilTmpAvg": "day-soil-tmp-avg",
-                "DayWindSpdAvg": "day-wind-spd-avg",
+                "DayAirTmpAvg": "day-air-tmp-avg",      # Average Air Temperature
+                "DayPrecip": "day-precip",              # Precipitation
+                "DayRelHumAvg": "day-rel-hum-avg",      # Average Relative Humidity
+                "DaySoilTmpAvg": "day-soil-tmp-avg",    # Average Soil Temperature
+                "DayWindSpdAvg": "day-wind-spd-avg",    # Average Wind Speed
             }
             self.zipcodes = zipcodes if zipcodes is not None else self.get_county_zipcodes()
         except Exception as e:
@@ -45,7 +46,7 @@ class CIMIS:
     def get_data_zipcodes(self, zipcodes, start, end):
         try:
             params = {
-                "appKey": os.getenv("CIMIS_API_KEY"),
+                "appKey": os.getenv('CIMIS_API_KEY'),
                 "targets": zipcodes,
                 "startDate": start,
                 "endDate": end,
