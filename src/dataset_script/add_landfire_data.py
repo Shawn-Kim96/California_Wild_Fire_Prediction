@@ -29,10 +29,11 @@ data_name_column_dict = {
 def add_landfire_data(fire_df):
     """
     Add new landfire columns (features) to existing fire data. 
+    
     Landfire data is used located in data/landfire_data/processed/
     
-    params:
-        - fire_df: existing fire data path
+    Params:
+    - fire_df: existing fire data path
     """
     
     for data_name, column_name in data_name_column_dict.items():
