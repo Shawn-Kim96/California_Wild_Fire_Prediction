@@ -23,3 +23,8 @@ The maximum dataset size per one download request is 1GB, which is about 4 month
 ### Data Extraction
 - `src/dataset_script/extract_climate_data_via_webv2.py` is a script to extract dataset with WEB V2 API.
 - However, there were errors while using API V2, so the code is deprecated.
+
+
+## Landfire Data
+- Can concat landfire data by executing `src/dataset_script/add_landfire_data.py`
+- More information can be found in `notebooks/2.0-ShawnKim-analyze_fuel_data.ipynb`
