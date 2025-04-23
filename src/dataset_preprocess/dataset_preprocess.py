@@ -1,16 +1,13 @@
 import pandas as pd
 
-
-
 def process_and_fill_date_column(df, date_col='date'):
     """
     Process a mixed-format date column, extract date features,
     and fill missing values in those features.
     """
     df = df.copy()
-
-
-    df[date_col] = pd.to_datetime(df[date_col], errors='coerce')
+    df[date_col] = [x[:10] for x in df[date_col]]
+    df[date_col] = pd.to_datetime(df[date_col])
 
     # Extract features
     df[f'{date_col}_year'] = df[date_col].dt.year
