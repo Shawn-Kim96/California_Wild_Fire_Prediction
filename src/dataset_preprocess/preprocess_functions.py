@@ -129,13 +129,20 @@ def fill_missing_values_only_with_autoencoder(data: pd.DataFrame, model, scaler)
 
 
 if __name__=="__main__":
+    """
+    This it some sample code on how to use data preprocess module.
+    """
+    
     total_df = pd.read_csv("/Users/shawn/Documents/sjsu/2025-1/ML_CMPE257/California_Wild_Fire_Prediction/data/final_data/total_data.csv")
     data_preprocess = DataPreprocess(data=total_df)
+    
     i = 0
     for _, row in total_df.iterrows():
         i += 1 if any(row.isna()) else 0
     print(f"Original data Nan value row count = {i}")
+    
     df_preprocessed = data_preprocess.fill_climate_nan_value(method='autoencoder')
+    
     i = 0
     for _, row in df_preprocessed.iterrows():
         i += 1 if any(row.isna()) else 0
