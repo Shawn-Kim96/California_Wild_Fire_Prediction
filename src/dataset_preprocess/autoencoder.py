@@ -29,12 +29,12 @@ class Autoencoder(nn.Module):
         return decoded
 
 # Train autoencoder with full data (fillna(0) as a simple mask strategy)
-def train_autoencoder_with_complete_data(df, num_epochs=30, batch_size=64):
-    df_clean = df.dropna()
+def train_autoencoder_with_complete_data(complete_data: pd.DataFrame, num_epochs=30, batch_size=64):
+    df_clean = complete_data.dropna()
     scaler = StandardScaler()
     X_scaled = scaler.fit_transform(df_clean)
 
-    model = Autoencoder(input_dim=df.shape[1]).to(device)
+    model = Autoencoder(input_dim=complete_data.shape[1]).to(device)
     optimizer = optim.Adam(model.parameters(), lr=0.001)
     criterion = nn.MSELoss()
 
@@ -53,10 +53,10 @@ def train_autoencoder_with_complete_data(df, num_epochs=30, batch_size=64):
     return model, scaler
 
 
-def fill_missing_values_only(df, model, scaler):
+def fill_missing_values_only(data: pd.DataFrame, model, scaler):
     model.eval()
-    df_filled = df.copy()
-    X_input = df.fillna(0).values
+    data_filled = data.copy()
+    X_input = data_filled.fillna(0).values
     
     X_scaled = scaler.transform(X_input)
     X_tensor = torch.tensor(X_scaled, dtype=torch.float32).to(device)
@@ -66,9 +66,9 @@ def fill_missing_values_only(df, model, scaler):
         reconstructed = scaler.inverse_transform(reconstructed)
 
     # Fill only the NaNs in original df
-    for i in range(df.shape[0]):
-        for j in range(df.shape[1]):
-            if pd.isna(df.iat[i, j]):
-                df_filled.iat[i, j] = reconstructed[i, j]
+    for i in range(data.shape[0]):
+        for j in range(data.shape[1]):
+            if pd.isna(data.iat[i, j]):
+                data_filled.iat[i, j] = reconstructed[i, j]
 
-    return df_filled
+    return data_filled
