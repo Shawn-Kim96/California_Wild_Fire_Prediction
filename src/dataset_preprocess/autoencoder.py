@@ -53,7 +53,7 @@ def train_autoencoder_with_complete_data(complete_data: pd.DataFrame, num_epochs
     return model, scaler
 
 
-def fill_missing_values_only(data: pd.DataFrame, model, scaler):
+def fill_missing_values_only_with_autoencoder(data: pd.DataFrame, model, scaler):
     model.eval()
     data_filled = data.copy()
     X_input = data_filled.fillna(0).values

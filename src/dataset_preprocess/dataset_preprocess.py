@@ -1,4 +1,19 @@
 import pandas as pd
+import torch
+import torch.optim as optim
+import torch.nn.functional as F
+import torch.nn as nn
+from dataset_preprocess.autoencoder import train_autoencoder_with_complete_data, fill_missing_values_only_with_autoencoder
+
+
+
+def fill_climate_nan_value(data: pd.DataFrame, method: str):
+    
+    if method == 'autoencoder':
+        model, scaler = train_autoencoder_with_complete_data
+
+
+
 
 def process_and_fill_date_column(df, date_col='date'):
     """
@@ -23,3 +38,4 @@ def process_and_fill_date_column(df, date_col='date'):
             df[col] = df[col].fillna(fallback)
 
     return df
+
