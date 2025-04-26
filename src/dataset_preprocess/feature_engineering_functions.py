@@ -92,8 +92,6 @@ def add_soil_dryness_index(df: pd.DataFrame) -> pd.DataFrame:
     df['soil_dryness_index'] = soil_mean / precip_total
     return df
 
-
-
 # ==================== TEST ==================== #
 if __name__ == "__main__":
     import os
