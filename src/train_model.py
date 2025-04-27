@@ -4,7 +4,7 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
-from sklearn.metrics import precision_score, recall_score, f1_score, accuracy_score, confusion_matrix
+from sklearn.metrics import precision_score, recall_score, f1_score, accuracy_score, confusion_matrix, roc_auc_score, roc_curve
 from xgboost import XGBClassifier
 import matplotlib.pyplot as plt
 import seaborn as sns
@@ -90,19 +90,23 @@ class TrainModel:
         f1   = f1_score(self.y_test, y_pred)
         acc  = accuracy_score(self.y_test, y_pred)
         cm   = confusion_matrix(self.y_test, y_pred)
+        auc  = roc_auc_score(self.y_test, y_pred)
         
         self.models[model_name]['result'] = {
             'prec': prec,
             'rec': rec,
             'f1': f1,
             'acc': acc,
-            'cm': cm
+            'cm': cm,
+            'auc': auc,
+            'y_pred': y_pred,
+            'y_true': self.y_test
         }
 
         # print(f"{model_name} Metrics:\n"
-        #     f"Precision = {prec:.3f}, Recall = {rec:.3f}, F1-score = {f1:.3f}, Accuracy = {acc:.3f}")
+        #     f"Precision = {prec:.3f}, Recall = {rec:.3f}, F1-score = {f1:.3f}, Accuracy = {acc:.3f}, ROC-AUC Score = {auc_score:.3f}")
         # print("Confusion Matrix (TN, FP, FN, TP):", cm.ravel())
-        return prec, rec, f1, acc, cm
+        return prec, rec, f1, acc, cm, auc
 
     def plot_confusion_matrix(self, model_name):
         cm_log = self.models[model_name]['result']['cm']
@@ -112,3 +116,22 @@ class TrainModel:
         plt.xlabel("Predicted")
         plt.ylabel("Actual")
         plt.show()
+        
+    def plot_roc_auc(self, y_pred, model_name):
+        #    calculates AUC score and prints ROC_AUC plot
+        auc_score = roc_auc_score(self.y_test, y_pred)
+
+        fpr, tpr, _ = roc_curve(self.y_test, y_pred)
+        plt.figure(figsize=(8, 6))
+        label = f'ROC Curve (AUC = {auc_score:.2f})'
+        if model_name:
+            label = f'{model_name} - ' + label
+        plt.plot(fpr, tpr, label=label)
+        plt.plot([0, 1], [0, 1], 'k--', label='Random Guess')
+        plt.xlabel('False Positive Rate')
+        plt.ylabel('True Positive Rate')
+        plt.title(f'ROC Curve{f" for {model_name}" if model_name else ""}')
+        plt.legend(loc='lower right')
+        plt.grid(True)
+        plt.show()
+     
