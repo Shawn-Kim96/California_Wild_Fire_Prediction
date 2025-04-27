@@ -99,9 +99,9 @@ class TrainModel:
             'cm': cm
         }
 
-        print(f"{model_name} Metrics:\n"
-            f"Precision = {prec:.3f}, Recall = {rec:.3f}, F1-score = {f1:.3f}, Accuracy = {acc:.3f}")
-        print("Confusion Matrix (TN, FP, FN, TP):", cm.ravel())
+        # print(f"{model_name} Metrics:\n"
+        #     f"Precision = {prec:.3f}, Recall = {rec:.3f}, F1-score = {f1:.3f}, Accuracy = {acc:.3f}")
+        # print("Confusion Matrix (TN, FP, FN, TP):", cm.ravel())
         return prec, rec, f1, acc, cm
 
     def plot_confusion_matrix(self, model_name):

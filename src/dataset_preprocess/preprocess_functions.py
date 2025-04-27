@@ -83,7 +83,7 @@ class DataPreprocess:
 
         # Only drop rows with NaN in climate columns
         self.preprocessed_data = self.preprocessed_data.dropna(subset=self.climate_columns)
-        print(f"Dropping Nan values after processing :: {original_length} -> {len(self.preprocessed_data)}")
+        # print(f"Dropping Nan values after processing :: {original_length} -> {len(self.preprocessed_data)}")
         return self.preprocessed_data
 
 
