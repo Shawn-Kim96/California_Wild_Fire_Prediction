@@ -24,7 +24,6 @@ class TrainModel:
     def split_test_train_dataset(self):
         # One-hot encode categorical features (month and fuel category codes)
         df_model = pd.get_dummies(self.df, columns=['date_month', 'CBD_VALUE', 'EVC_VALUE', 'FDIST_VALUE', 'FVC_VALUE'], drop_first=True)
-        df_model = df_model.drop(['date'], axis=1)
         # Separate features and target
         X = df_model.drop('is_fire', axis=1)
         y = df_model['is_fire']
@@ -37,10 +36,15 @@ class TrainModel:
         self.X_train_scaled = scaler.fit_transform(self.X_train)
         self.X_test_scaled = scaler.transform(self.X_test)
 
-        print("Training set size:", self.X_train.shape[0], "samples")
-        print("Test set size:", self.X_test.shape[0], "samples")
-        print("Number of features after encoding:", self.X_train.shape[1])
+        # print("Training set size:", self.X_train.shape[0], "samples")
+        # print("Test set size:", self.X_test.shape[0], "samples")
+        # print("Number of features after encoding:", self.X_train.shape[1])
 
+    def train_all_models(self):
+        self.train_logistic_regression()
+        self.train_gradient_boosting()
+        self.train_decision_tree()
+        self.train_xgboost()
 
     def train_logistic_regression(self):
         model_name = 'LogisticRegression'
@@ -49,7 +53,7 @@ class TrainModel:
         self.models[model_name]['model'] = logreg
 
         y_pred_log = logreg.predict(self.X_test_scaled)
-        self.evaluate_model(y_pred_log)
+        self.evaluate_model(y_pred_log, model_name)
 
     def train_gradient_boosting(self):
         model_name = 'GradientBoosting'
@@ -58,7 +62,7 @@ class TrainModel:
         self.models[model_name]['model'] = gb_model
         
         y_pred_gb = gb_model.predict(self.X_test)
-        self.evaluate_model(y_pred_gb)
+        self.evaluate_model(y_pred_gb, model_name)
 
     def train_decision_tree(self):
         model_name = 'DecisionTree'
@@ -67,17 +71,18 @@ class TrainModel:
         self.models[model_name]['model'] = dt_model
 
         y_pred_dt = dt_model.predict(self.X_test)
-        self.evaluate_model(y_pred_dt)
+        self.evaluate_model(y_pred_dt, model_name)
 
     def train_xgboost(self):
         model_name = 'XGBoost'
+        # X_train = X_train.apply(pd.to_numeric, errors='coerce')
         xgb_model = XGBClassifier(use_label_encoder=False, eval_metric='logloss', random_state=42)
         xgb_model.fit(self.X_train, self.y_train)
         self.models[model_name]['model'] = xgb_model
         
         # Predict on test data
         y_pred_xgb = xgb_model.predict(self.X_test)
-        self.evaluate_model(y_pred_xgb)
+        self.evaluate_model(y_pred_xgb, model_name)
 
     def evaluate_model(self, y_pred, model_name):
         prec = precision_score(self.y_test, y_pred)
@@ -93,12 +98,14 @@ class TrainModel:
             'f1': f1,
             'acc': acc,
             'cm': cm,
-            'auc': auc
+            'auc': auc,
+            'y_pred': y_pred,
+            'y_true': self.y_test
         }
 
-        print(f"{model_name} Metrics:\n"
-            f"Precision = {prec:.3f}, Recall = {rec:.3f}, F1-score = {f1:.3f}, Accuracy = {acc:.3f}, ROC-AUC Score = {auc_score:.3f}")
-        print("Confusion Matrix (TN, FP, FN, TP):", cm.ravel())
+        # print(f"{model_name} Metrics:\n"
+        #     f"Precision = {prec:.3f}, Recall = {rec:.3f}, F1-score = {f1:.3f}, Accuracy = {acc:.3f}, ROC-AUC Score = {auc_score:.3f}")
+        # print("Confusion Matrix (TN, FP, FN, TP):", cm.ravel())
         return prec, rec, f1, acc, cm, auc
 
     def plot_confusion_matrix(self, model_name):
@@ -112,11 +119,6 @@ class TrainModel:
         
     def plot_roc_auc(self, y_pred, model_name):
         #    calculates AUC score and prints ROC_AUC plot
-        #    Parameters:
-        #   - self
-        #   - y_prob: Predicted probabilities for the positive class.
-        #    - model_name: Name of selected model
-
         auc_score = roc_auc_score(self.y_test, y_pred)
 
         fpr, tpr, _ = roc_curve(self.y_test, y_pred)
