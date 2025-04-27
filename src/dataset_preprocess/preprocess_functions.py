@@ -58,7 +58,7 @@ class DataPreprocess:
         elif method == 'mean':
             nan_filled_data = self.preprocessed_data.copy()
             for col in self.climate_columns:
-                if col[-2:].isdigit():  # 숫자로 끝나는 컬럼만
+                if col[-2:].isdigit():
                     prefix = ''.join([c for c in col if not c.isdigit()])
                     num = int(''.join([c for c in col if c.isdigit()]))
                     prev_col = f"{prefix}{num-1:02d}"
