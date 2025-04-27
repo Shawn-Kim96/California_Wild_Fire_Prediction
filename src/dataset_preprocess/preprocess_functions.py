@@ -12,14 +12,15 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 class DataPreprocess:
     def __init__(self, data):
         self.data = data
-        self.climate_columns = data.select_dtypes(include='number').columns.tolist()
+        self.climate_columns = [x for x in data.columns if 'Day' in x]
         self.autoencoder = None
         self.scaler = None
         self.preprocessed_data = None
         self.process_and_fill_date_column()
-
+        self.drop_critical_columns()
+        
     def process_and_fill_date_column(self, date_col='date'):
-
+        """
         Process a mixed-format date column, extract date features,
         and fill missing values in those features.
         """
@@ -43,23 +44,57 @@ class DataPreprocess:
         self.preprocessed_data = df
 
     def fill_climate_nan_value(self, method: str):
-        climate_data = self.data[self.climate_columns]
+        climate_data = self.preprocessed_data[self.climate_columns]
 
         if method == 'autoencoder':
             complete_climate_data = climate_data.dropna()
             self.autoencoder, self.scaler = train_autoencoder_with_complete_data(complete_climate_data)
             nan_filled_data = fill_missing_values_only_with_autoencoder(climate_data, self.autoencoder, self.scaler)
-            self.data[self.climate_columns] = nan_filled_data
+            self.preprocessed_data[self.climate_columns] = nan_filled_data
             
         elif method == 'fill_zero':
-            nan_filled_data = self.data.fillna(0)
+            nan_filled_data = self.preprocessed_data.fillna(0)
+
+        elif method == 'mean':
+            nan_filled_data = self.preprocessed_data.copy()
+            for col in self.climate_columns:
+                if col[-2:].isdigit():  # 숫자로 끝나는 컬럼만
+                    prefix = ''.join([c for c in col if not c.isdigit()])
+                    num = int(''.join([c for c in col if c.isdigit()]))
+                    prev_col = f"{prefix}{num-1:02d}"
+                    next_col = f"{prefix}{num+1:02d}"
+
+                    mask = nan_filled_data[col].isna()
+                    if prev_col in self.preprocessed_data.columns and next_col in self.preprocessed_data.columns:
+                        nan_filled_data.loc[mask, col] = (
+                            nan_filled_data.loc[mask, [prev_col, next_col]].mean(axis=1)
+                        )
+                    elif prev_col in self.preprocessed_data.columns:
+                        nan_filled_data.loc[mask, col] = nan_filled_data.loc[mask, prev_col]
+                    elif next_col in self.preprocessed_data.columns:
+                        nan_filled_data.loc[mask, col] = nan_filled_data.loc[mask, next_col]
+            self.preprocessed_data[self.climate_columns] = nan_filled_data[self.climate_columns]
 
         else:
             raise ValueError(f"Unknown method '{method}'")
 
         self.preprocessed_data = nan_filled_data
-        return nan_filled_data
+        original_length = len(self.preprocessed_data)
 
+        # Only drop rows with NaN in climate columns
+        self.preprocessed_data = self.preprocessed_data.dropna(subset=self.climate_columns)
+        print(f"Dropping Nan values after processing :: {original_length} -> {len(self.preprocessed_data)}")
+        return self.preprocessed_data
+
+
+    def drop_critical_columns(self):
+        drop_cols = ['burn_probability', 'conditional_flame_length', 
+                 'distance_km', 'exposure', 'flame_length_exceedance_4ft', 'flame_length_exceedance_8ft',
+                 'wildfire_hazard_potential', 'risk_to_structures', 'acres_burned', 'latitude', 'longitude', 'date']
+        self.preprocessed_data.drop(columns=[col for col in drop_cols if col in self.preprocessed_data.columns], inplace=True, errors='ignore')
+        if 'Unnamed: 0' in self.preprocessed_data.columns:
+            self.preprocessed_data.drop(columns=['Unnamed: 0'], inplace=True)
+        
 
 class Autoencoder(nn.Module):
     def __init__(self, input_dim):

@@ -22,19 +22,22 @@ def add_trend_diff_features(df: pd.DataFrame) -> pd.DataFrame:
         cols = [f'{cat}{str(i).zfill(2)}' for i in range(1, 15)]
         # First-order difference (last - first)
         df[f'{cat}_diff14'] = df[cols[-1]] - df[cols[0]]
+
         # Linear slope: regression of values across the 14 days
         X = np.arange(14).reshape(-1, 1)  # [0,1,2,...,13]
+        A = np.hstack([X, np.ones_like(X)])  # Design matrix for least squares
+
         slopes = []
         for _, row in df[cols].iterrows():
             y = row.values
-            # Handle missing values by skipping regression
             if np.isnan(y).any():
                 slopes.append(np.nan)
             else:
-                A = np.hstack([X, np.ones_like(X)])
                 m, _ = np.linalg.lstsq(A, y.reshape(-1, 1), rcond=None)[0]
-                slopes.append(m)
+                slopes.append(m.item())
+
         df[f'{cat}_slope14'] = slopes
+
     return df
 
 def add_extreme_event_flags(df: pd.DataFrame) -> pd.DataFrame:
