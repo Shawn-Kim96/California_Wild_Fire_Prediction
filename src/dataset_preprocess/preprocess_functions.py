@@ -86,7 +86,6 @@ class DataPreprocess:
         # print(f"Dropping Nan values after processing :: {original_length} -> {len(self.preprocessed_data)}")
         return self.preprocessed_data
 
-
     def drop_critical_columns(self):
         drop_cols = ['burn_probability', 'conditional_flame_length', 
                  'distance_km', 'exposure', 'flame_length_exceedance_4ft', 'flame_length_exceedance_8ft',

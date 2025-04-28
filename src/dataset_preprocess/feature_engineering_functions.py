@@ -63,7 +63,6 @@ def add_interaction_features(df: pd.DataFrame) -> pd.DataFrame:
     
     return df
 
-
 def add_rolling_std_features(df: pd.DataFrame) -> pd.DataFrame:
     """Add rolling standard deviation over 14-day period for each climate feature."""
     categories = ['DayAirTmpAvg', 'DayPrecip', 'DayRelHumAvg', 'DaySoilTmpAvg', 'DayWindSpdAvg']
