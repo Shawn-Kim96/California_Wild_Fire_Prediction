@@ -31,6 +31,37 @@ The goal is to enhance early warning systems, improve wildfire prevention, and o
 └── README.md                               # Project documentation (this file)
 ```
 
+## How to Run
+### Environment Setup
+- Python version: 3.11.5
+- Dependency installation
+```bash
+pip install poetry
+poetry install
+poetry shell  # initialize virtual environment
+```
+
+### Data Collecting
+```bash
+python src/dataset_extract/extract_climate_data_via_webv2.py  # collects climate data
+python src/dataset_extract/add_landfire_data.py  # collects land data
+
+# for risk data, should execute notebooks/4.0-HashemJaber...ipynb code
+```
+
+### Data Preprocessing & Feature Engineering
+- Data preprocessing python script: `src/dataset_preprocess/preprocess_functions.py`
+- Feature Engineering python functions: `src/dataset_preprocess/feature_engineering_functions.py`
+- Example of feature engineering and data preprocessing usage in notebook: `notebooks/11.0-RodrigoShawn-test_feature_engineering.ipynb`
+
+### Model Training
+- Model training python script: `src/train_model.py`
+- Example of model training in notebook: `notebooks/11.0-RodrigoShawn-test_feature_engineering.ipynb`
+
+### Data and Model Analysis
+- Example of data and model analysis in notebooks: `notebooks/8.0-ShawnKim-design_prediction_model`, `notebooks/12.0-ShawnKim-final_data_analysis`
+
+
 ## Highlights
 - Datasets from multiple trusted sources (NOAA, CAL FIRE, LANDFIRE).
 
