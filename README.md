@@ -6,6 +6,8 @@ The Wildfire Risk Prediction Model aims to predict wildfire occurrences across d
 
 The goal is to enhance early warning systems, improve wildfire prevention, and optimize resource allocation.
 
+[Github Repository Link](https://github.com/Shawn-Kim96/California_Wild_Fire_Prediction)
+
 ## Project Directory Structure
 
 ```bash
@@ -47,12 +49,13 @@ The goal is to enhance early warning systems, improve wildfire prevention, and o
 ## Timelines
 
 
-Phase | Timeline | Details
-Phase 1 | Jan - Feb 2025 | Project Proposal & Planning
-Phase 2 | Feb - Mar 2025 | Data Collection & Preprocessing
-Phase 3 | Mar - Apr 2025 | Model Development & Training
-Phase 4 | Apr - May 2025 | Model Evaluation & Refinement
-Phase 5 | May 2025 | Deployment & Final Report
+|Phase | Timeline | Details|
+|---|---|---|
+|Phase 1 | Jan - Feb 2025 | Project Proposal & Planning|
+|Phase 2 | Feb - Mar 2025 | Data Collection & Preprocessing|
+|Phase 3 | Mar - Apr 2025 | Model Development & Training|
+|Phase 4 | Apr - Apr 2025 | Model Evaluation & Refinement|
+|Phase 5 | Apr 2025 | Deployment & Final Report|
 
 
 ## Git Workflow & Commit Message Convention
